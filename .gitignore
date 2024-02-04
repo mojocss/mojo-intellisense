@@ -3,6 +3,10 @@
 .cache
 dist
 
+# workspaces
+.vscode
+.vscodeignore
+
 # Node dependencies
 node_modules
 package-lock.json
