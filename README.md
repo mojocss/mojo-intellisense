@@ -1,4 +1,4 @@
-# Mojo VSCode Extension
+# Mojo CSS VSCode Extension
 
 This extension provides autocompletion for [Mojo](https://mojocss.com) utility classes in your HTML, CSS, and JavaScript files. It dynamically generates suggestions based on your Mojo configuration.
 
