@@ -1,5 +1,7 @@
 # Mojo CSS VSCode Extension
 
+![intellisense-p](https://github.com/mojocss/mojo-intellisense/assets/49538239/44c8a533-12e4-45f6-9859-678215d81440)
+
 This extension provides autocompletion for [Mojo](https://mojocss.com) utility classes in your HTML, CSS, and JavaScript files. It dynamically generates suggestions based on your Mojo configuration.
 
 ## Features
