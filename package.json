@@ -4,7 +4,7 @@
   "displayName": "Mojo CSS Intellisense",
   "icon": "icon.png",
   "description": "",
-  "version": "0.0.2",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.81.0"
   },
@@ -26,6 +26,7 @@
     "onLanguage:typescript",
     "onLanguage:javascriptreact",
     "onLanguage:jsx",
+    "onLanguage:tsx",
     "onLanguage:handlebars",
     "onLanguage:hbs",
     "onLanguage:django-html",

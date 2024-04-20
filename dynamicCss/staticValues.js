@@ -75,28 +75,28 @@ module.exports = {
     double: "",
     hidden: "",
   },
-  "border-top-s": {
+  "border-t-s": {
     solid: "",
     dashed: "",
     dotted: "",
     double: "",
     hidden: "",
   },
-  "border-right-s": {
+  "border-r-s": {
     solid: "",
     dashed: "",
     dotted: "",
     double: "",
     hidden: "",
   },
-  "border-bottom-s": {
+  "border-b-s": {
     solid: "",
     dashed: "",
     dotted: "",
     double: "",
     hidden: "",
   },
-  "border-left-s": {
+  "border-l-s": {
     solid: "",
     dashed: "",
     dotted: "",
@@ -238,11 +238,11 @@ module.exports = {
   z: {
     auto: "",
   },
-  "flex-grow": {
+  "flex-g": {
     0: "",
     1: "",
   },
-  "flex-shrink": {
+  "flex-s": {
     0: "",
     1: "",
   },
@@ -417,7 +417,7 @@ module.exports = {
     "zoom-out": "",
     none: "",
   },
-  "pointer-events": {
+  "pointer-e": {
     none: "",
     auto: "",
   },
@@ -444,18 +444,5 @@ module.exports = {
     "top-left": "",
     "bottom-right": "",
     "bottom-left": "",
-  },
-  "": {
-    "": "",
-    "": "",
-    "": "",
-    "": "",
-    "": "",
-    "": "",
-  },
-  // "": {
-  //   "": "",
-  //   "": "",
-  //   "": "",
-  // },
+  }
 };

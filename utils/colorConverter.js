@@ -1,128 +1,75 @@
-const colorDict = {
-  transparent: [0, 0, 0, 0],
-  black: [0, 0, 0, 1],
-  silver: [192, 192, 192, 1],
-  gray: [128, 128, 128, 1],
-  white: [255, 255, 255, 1],
-  maroon: [128, 0, 0, 1],
-  red: [255, 0, 0, 1],
-  purple: [128, 0, 128, 1],
-  fuchsia: [255, 0, 255, 1],
-  green: [0, 128, 0, 1],
-  lime: [0, 255, 0, 1],
-  olive: [128, 128, 0, 1],
-  yellow: [255, 255, 0, 1],
-  navy: [0, 0, 128, 1],
-  blue: [0, 0, 255, 1],
-  teal: [0, 128, 128, 1],
-  aqua: [0, 255, 255, 1],
-  pink: [255, 192, 203, 1],
-  orange: [255, 165, 0, 1],
-  brown: [165, 42, 42, 1],
-  tan: [210, 180, 140, 1],
-  beige: [245, 245, 220, 1],
-  lavender: [230, 230, 250, 1],
-  violet: [238, 130, 238, 1],
-  magenta: [255, 0, 255, 1],
-  cyan: [0, 255, 255, 1],
-  turquoise: [64, 224, 208, 1],
+const toHsl = input => {
+    try {
+        let match = input.match(/^hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)$/);
+        if (match) return [parseInt(match[1]), parseFloat(match[2]), parseFloat(match[3])];
+
+        const hexToRgb = hex => {
+            hex = hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => r + r + g + g + b + b);
+            return hex.match(/\w{2}/g).map(val => parseInt(val, 16));
+        };
+        const rgbToHSL = ([r, g, b]) => {
+            if (isNaN(r) || isNaN(g) || isNaN(b))
+                return input;
+
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            if (max === min) h = s = 0;
+            else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h *= 60;
+            }
+            return [Math.round(h), Math.round(s * 100), Math.round(l * 100)];
+        };
+
+        const rgb = input.startsWith('rgb') ? input.match(/[\d.]+/g).map(Number) : hexToRgb(input);
+        return rgbToHSL(rgb);
+    } catch (e) {
+        return input;
+    }
 };
 
-const cc = {
-  hslToRgba: function (h, s, l, a) {
-    const c = (1 - Math.abs(2 * l - 1)) * s;
-    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-    const m = l - c / 2;
-    let rgba = [];
-    if (h >= 0 && h < 60) {
-      rgba = [c, x, 0];
-    } else if (h >= 60 && h < 120) {
-      rgba = [x, c, 0];
-    } else if (h >= 120 && h < 180) {
-      rgba = [0, c, x];
-    } else if (h >= 180 && h < 240) {
-      rgba = [0, x, c];
-    } else if (h >= 240 && h < 300) {
-      rgba = [x, 0, c];
-    } else if (h >= 300 && h < 360) {
-      rgba = [c, 0, x];
-    }
-    rgba = rgba.map((val) => Math.round((val + m) * 255));
-    return [...rgba, a];
-  },
 
-  rgbToRgba: function (r, g, b, a) {
-    return [r, g, b, a];
-  },
-  parseColor: function (colorString) {
-    if (typeof colorString !== typeof "") colorString = "transparent";
-    let colorValues;
-    if (colorDict[colorString]) {
-      colorValues = colorDict[colorString];
-    } else if (colorString.startsWith("#")) {
-      const hex = colorString.substring(1);
-      if (hex.length === 3 || hex.length === 4) {
-        const r = parseInt(`${hex[0]}${hex[0]}`, 16);
-        const g = parseInt(`${hex[1]}${hex[1]}`, 16);
-        const b = parseInt(`${hex[2]}${hex[2]}`, 16);
-        const a = hex.length === 4 ? parseInt(`${hex[3]}${hex[3]}`, 16) : 255;
-        colorValues = this.rgbToRgba(r, g, b, a / 255);
-      } else {
-        const r = parseInt(hex.substring(0, 2), 16);
-        const g = parseInt(hex.substring(2, 4), 16);
-        const b = parseInt(hex.substring(4, 6), 16);
-        const a =
-          hex.length === 8 ? parseInt(hex.substring(6, 8), 16) / 255 : 1;
-        colorValues = this.rgbToRgba(r, g, b, a);
-      }
-    } else if (colorString.startsWith("rgb")) {
-      colorValues = colorString
-        .substring(colorString.indexOf("(") + 1, colorString.lastIndexOf(")"))
-        .split(",");
-      if (colorValues.length === 3) {
-        colorValues.push(1);
-      }
-      colorValues = this.rgbToRgba(
-        ...colorValues.map((val) => parseFloat(val))
-      );
-    } else if (colorString.startsWith("hsl")) {
-      colorValues = colorString
-        .substring(colorString.indexOf("(") + 1, colorString.lastIndexOf(")"))
-        .split(",");
-      colorValues[0] = parseFloat(colorValues[0]);
-      colorValues[1] = parseFloat(colorValues[1]) / 100;
-      colorValues[2] = parseFloat(colorValues[2]) / 100;
-      if (colorValues.length === 3) {
-        colorValues.push(1);
-      } else {
-        colorValues[3] = parseFloat(colorValues[3]);
-        colorValues[3] = colorValues[3] > 1 ? 1 : colorValues[3];
-        colorValues[3] = colorValues[3] < 0 ? 0 : colorValues[3];
-      }
-      colorValues = this.hslToRgba(...colorValues);
+const toHex = (h, s, l) => {
+    let r, g, b;
+    s /= 100;
+    l /= 100;
+
+    if (s === 0) {
+        r = g = b = l;
+    } else {
+        const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h / 360 + 1 / 3);
+        g = hue2rgb(p, q, h / 360);
+        b = hue2rgb(p, q, h / 360 - 1 / 3);
     }
-    return colorValues;
-  },
-  lighten: function (color, percent) {
-    const colorValues = this.parseColor(color);
-    if(colorValues) {
-      const increase = Math.round((255 * percent) / 100);
-      return colorValues.map((c, i) =>
-        i === colorValues.length - 1 ? c : Math.min(c + increase, 255)
-      );
-    }
-    return color;
-  },
-  darken: function (color, percent) {
-    const colorValues = this.parseColor(color);
-    if(colorValues) {
-      const decrease = Math.round((255 * percent) / 100);
-      return colorValues.map((c, i) =>
-        i === colorValues.length - 1 ? c : Math.max(c - decrease, 0)
-      );
-    }
-    return color;
-  },
+
+    const toHexComponent = (c) => {
+        const hex = Math.round(c * 255).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    };
+
+    const hex = `#${toHexComponent(r)}${toHexComponent(g)}${toHexComponent(b)}`;
+    return hex.toUpperCase();
 };
 
-module.exports = cc;
+
+module.exports = {
+    toHsl,
+    toHex
+}
