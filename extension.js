@@ -9,6 +9,8 @@ const mergeConfig = require("./utils/mergeConfig");
 const pseudos = require("./utils/pseudos");
 const fs = require('fs');
 const path = require('path');
+const glob = require('glob');
+const markdownit = require('markdown-it');
 
 const colorNames = {};
 
@@ -18,6 +20,7 @@ for (const i in utilityProperties["_"]) {
 const utilityPropertiesSorted = Object.keys(utilityProperties).sort();
 const workspaceFolders = vscode.workspace.workspaceFolders;
 
+
 function activate(context) {
   loadConfig();
 
@@ -26,45 +29,53 @@ function activate(context) {
     const watcher = chokidar.watch(configFile);
 
     watcher.on("change", () => {
-      console.log("mojo.config.js was changed")
-      loadConfig();
+      const status = loadConfig();
+      if (status)
+        vscode.window.showInformationMessage('Mojo CSS Intellisense has been reconfigured.');
+      else
+        vscode.window.showErrorMessage("Failed to read the 'mojo.config.js' file.");
     });
   }
 
-  const supportedLanguages = [
-    'html',
-    'plaintext',
-    'php',
-    'vue',
-    'vue-html',
-    'javascript',
-    'typescript',
-    'javascriptreact',
-    'jsx',
-    'tsx',
-    'handlebars',
-    'hbs',
-    'django-html',
-    'erb',
-    'blade',
-    'twig',
-    'liquid',
-    'ejs',
-    'handlebars',
-    'razor',
-    'pug',
-    'slim',
-    'nunjucks'
-  ];
+  context.subscriptions.push(
+    vscode.languages.registerCompletionItemProvider(
+      { scheme: 'file', language: '*' },
+      new CompletionProvider(),
+      ...getAlphabetCharacters()
+    )
+  );
 
-  supportedLanguages.forEach(language => {
-    context.subscriptions.push(
-      vscode.languages.registerCompletionItemProvider(
-        { scheme: 'file', language },
-        new CompletionProvider(),
-        ...getAlphabetCharacters()
-      )
+  const nestedFiles = getNestedFiles(__dirname, 'docs/**/*.md');
+
+  const data = nestedFiles.docs;
+  const docsDataProvider = new DocsDataProvider(data);
+  vscode.window.registerTreeDataProvider('mojocss-docs-files', docsDataProvider);
+  vscode.commands.registerCommand('mojocss-docs.refresh', () => docsDataProvider.refresh());
+
+  const viewerProvider = new MarkdownViewerProvider();
+  context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('markdown-viewer', viewerProvider));
+
+  let openedTabs = {};
+  vscode.commands.registerCommand('mojocss-docs.openFile', async (filePath, title) => {
+    if (openedTabs[title]) {
+      openedTabs[title].reveal();
+      return;
+    }
+
+    const panel = vscode.window.createWebviewPanel(
+      'markdownViewer',
+      title,
+      vscode.ViewColumn.Active,
+      {
+        enableScripts: true
+      }
     );
+    openedTabs[title] = panel;
+    panel.webview.html = await viewerProvider.provideTextDocumentContent(filePath, title);
+
+    panel.onDidDispose(() => {
+      delete openedTabs[title];
+    });
   });
 }
 
@@ -77,6 +88,8 @@ function getAlphabetCharacters() {
 }
 
 function loadConfig() {
+  let status = true;
+
   if (workspaceFolders) {
     for (let i in workspaceFolders) {
       const projectPath = workspaceFolders[i].uri.fsPath;
@@ -103,6 +116,7 @@ function loadConfig() {
         } catch (e) {
           console.log(e)
           console.log("mojo.config.js was not found or invalid");
+          status = false;
         }
       } else {
         console.log("mojo.config.js was not found:", configFilePath);
@@ -122,6 +136,8 @@ function loadConfig() {
   staticValues["text-lh"] = { ...staticValues["text-lh"], ...config.base.definedValues.lineHeight }
   staticValues["_i_rounded"] = { ...staticValues["_i_rounded"], ...config.base.definedValues.borderRadius }
   staticValues["text"] = { ...config.base.textDesign }
+
+  return status;
 }
 
 class CompletionProvider {
@@ -475,7 +491,7 @@ class CompletionProvider {
               items.push(item);
           }
           if (negative.includes(suggestionText)) {
-            const item = this.createSuggestionItem("-" + suggestionText , key);
+            const item = this.createSuggestionItem("-" + suggestionText, key);
             item.sortText = suggestionText.slice(1) + "-" + this.padNumber(0, 4);
             if (item)
               items.push(item);
@@ -513,13 +529,13 @@ class CompletionProvider {
           const hex = colorNames[i].startsWith("#") ? colorNames[i].toUpperCase() : toHex(...hsl);
           const item = this.createSuggestionItem(
             suggestionText + i,
-            key, 
+            key,
             (hex.length === 7 || hex.length === 4) ? hex : ''
           );
           if (item)
             items.push(item);
 
-          for (let j = 1; j <= count.color ; j++) {
+          for (let j = 1; j <= count.color; j++) {
             if (
               colorNames[i] !== "#fff" &&
               colorNames[i] !== "#ffffff" &&
@@ -735,6 +751,248 @@ class CompletionProvider {
     return item;
   }
 
+}
+
+function getNestedFiles(directory, pattern) {
+  const files = glob.sync(path.join(directory, pattern));
+  const nestedFiles = {};
+
+  files.forEach(file => {
+    const relativePath = path.relative(directory, file);
+    const parts = relativePath.split(path.sep);
+    let currentLevel = nestedFiles;
+
+    parts.forEach(part => {
+      if (!currentLevel[part]) {
+        currentLevel[part] = {};
+      }
+      currentLevel = currentLevel[part];
+
+      if (part.endsWith(".md")) {
+        let content = fs.readFileSync(file, 'utf-8').split("---");
+        if (content.length > 1) {
+          const data = content[1].split("\n");
+          data.map((value) => {
+            value = value.split(":");
+            if (value.length > 1)
+              currentLevel[value[0].trim()] = value[1].trim();
+          })
+        }
+      }
+
+    });
+  });
+
+  return nestedFiles;
+}
+
+class MarkdownViewerProvider {
+  constructor() {
+    this._onDidChange = new vscode.EventEmitter();
+    this.onDidChange = this._onDidChange.event;
+  }
+
+  async provideTextDocumentContent(filePath, title) {
+    let markdownContent = fs.readFileSync(filePath, 'utf-8');
+    const markdownContentSpl = markdownContent.split("---");
+    if (markdownContentSpl.length > 1){
+      markdownContentSpl.shift();
+      markdownContentSpl.shift();
+      markdownContent = markdownContentSpl.join("---");
+    }
+
+    markdownContent = markdownContent.replace(/<utldemo[\s\S]*?\/utldemo>/g, '')
+      .replace(/(?:```[\s\S]*?```|<[^>]*>)/g, function (match) {
+        if (match.startsWith('```') || match.endsWith('```')) {
+          return match;
+        } else {
+          return '';
+        }
+      })
+      .replace(/class="([^"]*)"/g, function (m, p) {
+        return 'class="' + p.trim().replace(/  /g, " ") + '"';
+      })
+      .replace(/(\n{2,}|\r\n{2,})/g, '\n')
+      .replace(/    /g, "  ")
+
+    const md = markdownit()
+    const html = md.render(markdownContent)
+      .replace(/--(.*?)\*\*/g, function (m, p) {
+        return `<b class="bold-box">${p.trim()}</b>`
+      });
+
+    return `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Markdown Preview</title>
+                <style>
+                body {
+                    line-height: 1.6;
+                    margin: 0;
+                    padding: 0;
+                }
+                h1, h2, h3, h4, h5, h6 {
+                    margin-top: 20px;
+                    margin-bottom: 10px;
+                }
+                p {
+                    margin-top: 0;
+                    margin-bottom: 10px;
+                }
+                a{
+                    text-decoration: none;
+                    color: inherit
+                }
+                pre {
+                    background-color: rgba(128,128,128,0.15);
+                    padding: 10px;
+                    border-radius: 5px;
+                    overflow-x: auto;
+                }
+                code {
+                    background-color: rgba(128,128,128,0.15);
+                    font-family: Consolas, monospace;
+                    font-size: 90%;
+                    overflow: auto;
+                }
+                pre code {
+                    background-color: transparent !important;
+                }
+                blockquote {
+                    border-left: 2px solid rgba(128,128,128,0.15);
+                    margin-left: 0;
+                    padding-left: 10px;
+                    border-radius: 5px;
+                }
+                img {
+                    max-width: 100%;
+                    height: auto;
+                }
+                table {
+                    background-color: rgba(128,128,128,0.1);
+                    border-collapse: collapse;
+                    width: 100%;
+                    border-radius: 5px;
+                    overflow: hidden;
+                }
+                th, td {
+                    padding: 8px;
+                    text-align: left;
+                }
+                th:not(:first-child), td:not(:first-child) {
+                  border-left: 1px solid rgba(128,128,128,0.1);
+                }
+                tr:not(:first-child) th,tr:not(:first-child) td {
+                  border-top: 1px solid rgba(128,128,128,0.1);
+                }
+                th {
+                    background-color: rgba(128,128,128,0.2);
+                }
+                .additional{
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    position: sticky;
+                    top: 0;
+                    padding: 1rem 1.5rem;
+                    background-color: rgba(45,45,45,0.9);
+                    backdrop-filter: blur(1rem);
+                    color: rgba(255,255,255,0.9);
+                    gap: 1rem;
+                }
+                .additional a{
+                    background: #FF6145;
+                    color: #fff;
+                    text-decoration: none;
+                    padding: .5rem 1rem;
+                    border-radius: .35rem;
+                    font-weight: bold;
+                    white-space: nowrap;
+                  
+                }
+                hr{
+                    display: none;
+                }
+                .main{
+                    padding: 1.5rem;
+                }
+                .bold-box{
+                    background:rgba(0,0,0,0.1);
+                    padding: .15rem .25rem;
+                    border-radius: .25rem;
+                }
+                </style>
+            </head>
+            <body>
+                <div class="additional">
+                  View additional information and examples on the Mojo CSS website:
+                  <a href="https://mojocss.com/docs/${filePath.split("/docs/")[1].replace(".md", "")}" target="_blank" >Open Website</a> 
+                </div>
+                <div class="main">
+                <h1 style="margin-top: 0">${title}</h1>
+                ${html}
+                </div>
+            </body>
+            </html>
+        `;
+  }
+}
+
+class DocsDataProvider {
+  constructor(data) {
+    this.data = data;
+    this._onDidChangeTreeData = new vscode.EventEmitter();
+    this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+  }
+
+  refresh() {
+    this._onDidChangeTreeData.fire();
+  }
+
+  getTreeItem(element) {
+    return element;
+  }
+
+  async getChildren(element) {
+    if (!element) {
+      const sortOrder = ["guide", "config", "utilities"];
+      const sortedKeys = Object.keys(this.data).sort((a, b) => {
+        return sortOrder.indexOf(a) - sortOrder.indexOf(b);
+      });
+      return sortedKeys.map(key => {
+        const item = new vscode.TreeItem(key.charAt(0).toUpperCase() + key.slice(1), vscode.TreeItemCollapsibleState.Collapsed);
+        item.dataKey = key;
+
+        return item;
+      });
+    } else {
+      const subData = this.data[element.dataKey];
+      if (subData) {
+        const sortedKeys = Object.keys(subData)
+          .sort((a, b) => {
+            if (subData[a].catid !== subData[b].catid) {
+              return subData[a].catid - subData[b].catid;
+            }
+            return subData[a].level - subData[b].level;
+          });
+
+        return sortedKeys.map(key => {
+          const filePath = path.join(__dirname, "docs/" + element.dataKey + "/" + key);
+          const item = new vscode.TreeItem(subData[key].title, vscode.TreeItemCollapsibleState.None);
+          item.command = {
+            command: 'mojocss-docs.openFile',
+            title: 'Open File',
+            arguments: [filePath, subData[key].title]
+          };
+
+          return item;
+        });
+      } else {
+        return [];
+      }
+    }
+  }
 }
 
 module.exports = {
