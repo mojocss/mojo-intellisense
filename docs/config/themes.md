@@ -19,26 +19,26 @@ Mojo comes with a default theme color, perfect to kickstart your project.
 
 <div class="h-60 overflow-auto">
 
-| Property | Type | Default Value |
-| -------- | | --------- | ------------- |
-| body | string | "#fff" |
-| invert | string | "#202129" |
-| primary | string | "#ff6145" |
-| white | string | "#fff" |
-| black | string | "#000" |
-| gray | string | "#666666" |
-| grayblue | string | "#455370" |
-| red | string | "#e84c3d" |
-| pink | string | "#ff004e" |
-| orange | string | "#f39b13" |
-| yellow | string | "#f1c40f" |
-| tealblue | string | "#01caff" |
-| blue | string | "#0078ff" |
-| green | string | "#2ccd70" |
-| purple | string | "#5a51de" |
-| bronze | string | "#c67c3b" |
-| orchid | string | "#9a59b5" |
-| charcoal | string | "#31394c" |
+| Property | Type   | Default Value |
+| -------- | ------ | ------------- |
+| body     | string | "#fff"        |
+| invert   | string | "#202129"     |
+| primary  | string | "#ff6145"     |
+| white    | string | "#fff"        |
+| black    | string | "#000"        |
+| gray     | string | "#666666"     |
+| grayblue | string | "#455370"     |
+| red      | string | "#e84c3d"     |
+| pink     | string | "#ff004e"     |
+| orange   | string | "#f39b13"     |
+| yellow   | string | "#f1c40f"     |
+| tealblue | string | "#01caff"     |
+| blue     | string | "#0078ff"     |
+| green    | string | "#2ccd70"     |
+| purple   | string | "#5a51de"     |
+| bronze   | string | "#c67c3b"     |
+| orchid   | string | "#9a59b5"     |
+| charcoal | string | "#31394c"     |
 
 </div>
 

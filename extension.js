@@ -802,9 +802,15 @@ class MarkdownViewerProvider {
     }
 
     markdownContent = markdownContent.replace(/<utldemo[\s\S]*?\/utldemo>/g, '')
+      .replace(/<alert-box\b[^>]*>([\s\S]*?)<\/alert-box>/g, function (m, p) {
+        return "- " + p.replace(/<\/[^>]+(>|$)/g, "").replace(/\n/g, " ").replace(/    /g, "  ").trim() + "\n ";
+      })
+      .replace(/<s-box\b[^>]*>([\s\S]*?)<\/s-box>/g, function (m, p) {
+        return "- " + p.replace(/<\/[^>]+(>|$)/g, "").replace(/\n/g, " ").trim() + "\n ";
+      })
       .replace(/(?:```[\s\S]*?```|<[^>]*>)/g, function (match) {
         if (match.startsWith('```') || match.endsWith('```')) {
-          return match;
+          return match.trim();
         } else {
           return '';
         }
@@ -812,14 +818,45 @@ class MarkdownViewerProvider {
       .replace(/class="([^"]*)"/g, function (m, p) {
         return 'class="' + p.trim().replace(/  /g, " ") + '"';
       })
-      .replace(/(\n{2,}|\r\n{2,})/g, '\n')
       .replace(/    /g, "  ")
+
+    const theme = vscode.window.activeColorTheme.kind;
+    const colors = {
+      element: "#CE7C7D",
+      attribute: "#F1BD69",
+      value: "#88AB6D",
+      structure: "#aaa",
+    }
+    if (theme === 1){
+      colors.element = "#c44748";
+      colors.attribute = "#e59d28";
+      colors.value = "#508b22";
+      colors.structure = "#555";
+    }
 
     const md = markdownit()
     const html = md.render(markdownContent)
+      .replace(/&lt;([\s\S]*?)&gt;/g, function (m, p) {
+        if(p.trim().startsWith("!--"))
+          return `<span style="color:${colors.structure}">${m}</span>`;
+
+        const final = [];
+        let parts = p.split(" ");
+        parts = parts.filter(element => element.trim() !== "");
+        final.push(`<span style="color: ${colors.element}">${parts.shift()}</span>`);
+        parts.map((value) => {
+          const attrSpl = value.split("=");
+          if (attrSpl.length > 1)
+            attrSpl[0] = `<span style="color: ${colors.attribute}">${attrSpl[0]}</span>`
+          value = attrSpl.join(`<span style="color:${colors.structure}">=</span>`);
+
+          final.push(value);
+        });
+        return `<span style="color:${colors.structure}">&lt;</span>${final.join(" ")}<span style="color:${colors.structure}">&gt;</span>`
+      })
       .replace(/--(.*?)\*\*/g, function (m, p) {
         return `<b class="bold-box">${p.trim()}</b>`
-      });
+      })
 
     return `
             <!DOCTYPE html>
@@ -858,6 +895,7 @@ class MarkdownViewerProvider {
                 }
                 pre code {
                     background-color: transparent !important;
+                    display: block;
                 }
                 blockquote {
                     border-left: 2px solid rgba(128,128,128,0.15);
@@ -918,7 +956,7 @@ class MarkdownViewerProvider {
                     padding: 1.5rem;
                 }
                 .bold-box{
-                    background:rgba(0,0,0,0.1);
+                    background:rgba(0,0,0,0.2);
                     padding: .15rem .25rem;
                     border-radius: .25rem;
                 }
