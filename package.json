@@ -1,8 +1,8 @@
 {
   "name": "mojo-intellisense",
-  "publisher": "mojocss", 
+  "publisher": "mojocss",
   "displayName": "Mojo CSS Intellisense",
-  "icon": "icon.png",
+  "icon": "resources/icon.png",
   "description": "",
   "version": "0.2.0",
   "engines": {
@@ -17,30 +17,27 @@
     "Snippets"
   ],
   "activationEvents": [
-    "onLanguage:html",
-    "onLanguage:plaintext",
-    "onLanguage:php",
-    "onLanguage:vue",
-    "onLanguage:vue-html",
-    "onLanguage:javascript",
-    "onLanguage:typescript",
-    "onLanguage:javascriptreact",
-    "onLanguage:jsx",
-    "onLanguage:tsx",
-    "onLanguage:handlebars",
-    "onLanguage:hbs",
-    "onLanguage:django-html",
-    "onLanguage:erb",
-    "onLanguage:blade",
-    "onLanguage:twig",
-    "onLanguage:liquid",
-    "onLanguage:ejs",
-    "onLanguage:handlebars",
-    "onLanguage:razor",
-    "onLanguage:pug",
-    "onLanguage:slim",
-    "onLanguage:nunjucks"
+    "onStartupFinished"
   ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "mojocss-docs",
+          "title": "Mojo CSS Documentation",
+          "icon": "resources/mojo.svg"
+        }
+      ]
+    },
+    "views": {
+      "mojocss-docs": [
+        {
+          "id": "mojocss-docs-files",
+          "name": "Mojo CSS Documentation"
+        }
+      ]
+    }
+  },
   "main": "./extension.js",
   "scripts": {
     "lint": "eslint .",
@@ -53,12 +50,13 @@
     "@types/vscode": "^1.81.0",
     "@vscode/test-electron": "^2.3.4",
     "eslint": "^8.47.0",
-    "glob": "^10.3.3",
     "mocha": "^10.2.0",
+    "glob": "^10.3.15",
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "vscode-languageclient": "^8.1.0",
-    "chokidar": "^3.5.3"
+    "chokidar": "^3.5.3",
+    "markdown-it": "^14.1.0",
+    "vscode-languageclient": "^8.1.0"
   }
 }
