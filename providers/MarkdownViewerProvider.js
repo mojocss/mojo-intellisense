@@ -186,7 +186,7 @@ module.exports = class MarkdownViewerProvider {
             <body>
                 <div class="additional">
                   View additional information and examples on the Mojo CSS website:
-                  <a href="https://mojocss.com/docs/${filePath.split("/docs/")[1].replace(".md", "")}" target="_blank" >Open Website</a> 
+                  <a href="https://mojocss.com/docs/${filePath.replace(/\\/g,"/").split("/docs/")[1].replace(".md", "")}" target="_blank" >Open Website</a> 
                 </div>
                 <div class="main">
                 <h1 style="margin-top: 0">${title}</h1>
