@@ -190,3 +190,61 @@ Using `my-[number]`, you can control the element's margin from its vertical axis
     <span class="text-sm text-w-400">Learn more about <nuxt-link to="/docs/guide/arbitrary-styling">Arbitrary Styling</nuxt-link></span>
   </span>
 </s-box>
+
+## Margin Inline Start
+
+Using `ms-[number]`, you can control the element's margin from left or right side based on the text direction.
+
+<utldemo utl="ms" :items="['2','4','8','16']" active="2" _="(.demo) h-40">
+    <div class="border-left:3px_solid_$c.blue rounded-right-md">
+        <div class="target-demo w-20 h-5 bg-c-primary rounded-md"></div>
+    </div>    
+</utldemo>
+
+<alert-box type="info">
+  <span>
+    You can use numerical values which will be converted into a multiple of 0.25rem (can be changed in config → units) for consistent and precise sizing. <br> <br> For example, <span class="text-c-blue font-code">"ms-5"</span> will give you a margin-inline-start of 1.25rem.
+  </span>
+</alert-box>
+
+<s-box color="blue">
+  <span>
+    To use negative values simply add a "-" before the utility name,<br> such as <span class="hl">"-ms-4"</span>.
+  </span>
+</s-box>
+
+<s-box color="green:-2">
+  <span>
+    You can use Arbitrary values like <span class="hl">"ms-(16px)"</span> or <span class="hl">"ms-(2em)"</span> as well. <br>
+    <span class="text-sm text-w-400">Learn more about <nuxt-link to="/docs/guide/arbitrary-styling">Arbitrary Styling</nuxt-link></span>
+  </span>
+</s-box>
+
+## Margin Inline End
+
+Using `me-[number]`, you can control the element's margin from left or right side based on the text direction.
+
+<utldemo utl="me" :items="['2','4','8','16']" active="2" _="(.demo) h-40">
+    <div class="border-right:3px_solid_$c.blue rounded-left-md">
+        <div class="target-demo w-20 h-5 bg-c-primary rounded-md"></div>
+    </div>    
+</utldemo>
+
+<alert-box type="info">
+  <span>
+    You can use numerical values which will be converted into a multiple of 0.25rem (can be changed in config → units) for consistent and precise sizing. <br> <br> For example, <span class="text-c-blue font-code">"ms-5"</span> will give you a margin-inline-end of 1.25rem.
+  </span>
+</alert-box>
+
+<s-box color="blue">
+  <span>
+    To use negative values simply add a "-" before the utility name,<br> such as <span class="hl">"-me-4"</span>.
+  </span>
+</s-box>
+
+<s-box color="green:-2">
+  <span>
+    You can use Arbitrary values like <span class="hl">"me-(16px)"</span> or <span class="hl">"me-(2em)"</span> as well. <br>
+    <span class="text-sm text-w-400">Learn more about <nuxt-link to="/docs/guide/arbitrary-styling">Arbitrary Styling</nuxt-link></span>
+  </span>
+</s-box>

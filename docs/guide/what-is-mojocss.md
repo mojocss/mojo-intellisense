@@ -37,7 +37,7 @@ It does not provide an opinionated UI kit, but rather gives developers the flexi
 Here is an example of a qoute card using Mojo's utilities:
 
 <utldemo abovecode="true">
-    <div class="bg-c-body:+3 pa-5 border-left-3 border-c-primary rounded-right-md" dim="bg-c-body:+2" blackout="bg-c-body:+4">
+    <div class="bg-c-body:+3 pa-5 border-l-3 border-c-primary rounded-right-md" dim="bg-c-body:+2" blackout="bg-c-body:+4">
         <div class="text-c-stronginvert">
             “Any sufficiently advanced technology is
             indistinguishable from magic”
@@ -50,7 +50,7 @@ Here is an example of a qoute card using Mojo's utilities:
 <showcode lang="html">
 
 ```
-<div class="bg-c-body:+2 pa-5 border-left-3 border-c-primary rounded-right-md">
+<div class="bg-c-body:+2 pa-5 borde-l-3 border-c-primary rounded-right-md">
     <quote class="text-c-stronginvert">
         “Any sufficiently advanced technology is
         indistinguishable from magic”

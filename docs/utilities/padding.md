@@ -166,3 +166,49 @@ Using `py-[number]`, you can control the element's padding from its vertical axi
     <span class="text-sm text-w-400">Learn more about <nuxt-link to="/docs/guide/arbitrary-styling">Arbitrary Styling</nuxt-link></span>
   </span>
 </s-box>
+
+## Padding Inline Start
+
+Using `ps-[number]`, you can control the element's padding from left or right side based on the text direction.
+
+<utldemo utl="ps" :items="['2','4','8','16']" active="2" _="(.demo) h-40">
+    <div class="target-demo bg-c-primary[30] rounded-md">
+        <div class="w-20 h-5 bg-c-primary rounded-md"></div>
+    </div>    
+</utldemo>
+
+<alert-box type="info">
+  <span>
+    You can use numerical values which will be converted into a multiple of 0.25rem (can be changed in config → units) for consistent and precise sizing. <br> <br> For example, <span class="text-c-blue font-code">"ps-5"</span> will give you a padding-inline-start of 1.25rem.
+  </span>
+</alert-box>
+
+<s-box color="green:-2">
+  <span>
+    You can use Arbitrary values like <span class="hl">"ps-(16px)"</span> or <span class="hl">"ps-(2em)"</span> as well. <br>
+    <span class="text-sm text-w-400">Learn more about <nuxt-link to="/docs/guide/arbitrary-styling">Arbitrary Styling</nuxt-link></span>
+  </span>
+</s-box>
+
+## Padding Inline End
+
+Using `pe-[number]`, you can control the element's padding from left or right side based on the text direction.
+
+<utldemo utl="pe" :items="['2','4','8','16']" active="2" _="(.demo) h-40">
+    <div class="target-demo bg-c-primary[30] rounded-md">
+        <div class="w-20 h-5 bg-c-primary rounded-md"></div>
+    </div>    
+</utldemo>
+
+<alert-box type="info">
+  <span>
+    You can use numerical values which will be converted into a multiple of 0.25rem (can be changed in config → units) for consistent and precise sizing. <br> <br> For example, <span class="text-c-blue font-code">"pe-5"</span> will give you a padding-inline-end of 1.25rem.
+  </span>
+</alert-box>
+
+<s-box color="green:-2">
+  <span>
+    You can use Arbitrary values like <span class="hl">"pe-(16px)"</span> or <span class="hl">"pe-(2em)"</span> as well. <br>
+    <span class="text-sm text-w-400">Learn more about <nuxt-link to="/docs/guide/arbitrary-styling">Arbitrary Styling</nuxt-link></span>
+  </span>
+</s-box>

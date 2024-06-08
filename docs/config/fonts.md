@@ -35,18 +35,19 @@ You can define fonts as a single string, as shown in the example: 'Consolas, Mon
 <showcode lang="js">
 
 ```
-mojo({
-  base: {
-    fonts: {
-      default: ["'Poppins'", "sans-serif"],
-      alt: {
-        Poppins:"https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap",
-        "sans-serif": "",
+  mojo({
+    base: {
+      fonts: {
+        default: ["'Poppins'", "sans-serif"],
+        alt: {
+          Poppins:
+            "https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap",
+          "sans-serif": "",
+        },
+        code: 'Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace',
       },
-      code: 'Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace',
     },
-  },
-});
+  });
 ```
 
 </showcode>
